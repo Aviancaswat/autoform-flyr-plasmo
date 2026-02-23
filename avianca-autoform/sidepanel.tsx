@@ -1,38 +1,28 @@
-import { useState } from "react"
 import { Button } from "~/components/ui/button"
 import "~/globals.css"
 
 function IndexSidepanel() {
-  const [data, setData] = useState("")
 
   return (
-    <div className="w-full h-screen bg-background text-foreground p-4 flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Avianca Autoform</h1>
-      
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">Ingresa un valor:</label>
-        <input 
-          onChange={(e) => setData(e.target.value)} 
-          value={data}
-          className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          placeholder="Escribe aquí..."
-        />
+    <div className="w-full h-screen bg- text-foreground p-4 flex flex-col gap-4">
+      <div className="flex justify-center items-center flex-col gap-2">
+        <div className="p-4 bg-primary text-primary-foreground rounded-md w-max mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plane-icon lucide-plane"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-bold text-red-500">
+          AutoForm
+        </h1>
+        <h4 className="text-sm text-muted-foreground">
+          Ahorra tiempo en cada reserva
+        </h4>
       </div>
-
+      <div className="border-b-2 border-gray-300"></div>
       <Button variant="default" className="w-full">
         Enviar datos
       </Button>
-
-      <a 
-        href="https://docs.plasmo.com" 
-        target="_blank"
-        className="text-sm text-primary underline hover:text-primary/80"
-      >
-        Ver documentación
-      </a>
     </div>
   )
 }
 
 export default IndexSidepanel
-
