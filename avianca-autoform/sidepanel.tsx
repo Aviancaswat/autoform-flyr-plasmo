@@ -9,26 +9,22 @@ function IndexSidepanel() {
     if (status === "loading") return
     setStatus("loading")
     
-    // Send message to background script to change the background
-    console.log("[Sidepanel] Enviando mensaje para cambiar background...")
+    console.log("[Sidepanel] Enviando mensaje para rellenar formulario...")
     chrome.runtime.sendMessage(
       {
-        action: "changeBackground",
-        color: "#FF0000" // Red background
+        action: "fillForm"
       },
       (response) => {
         if (chrome.runtime.lastError) {
-          console.error("[Sidepanel] Error al cambiar background:", chrome.runtime.lastError)
+          console.error("[Sidepanel] Error al rellenar formulario:", chrome.runtime.lastError)
         } else {
           console.log("[Sidepanel] Mensaje enviado exitosamente. Respuesta:", response)
         }
       }
     )
     
-    // Simula el llenado de campos (reemplazar por la lógica real)
     await new Promise((r) => setTimeout(r, 1400))
     setStatus("done")
-    // Después de unos segundos vuelve a idle para permitir nueva interacción
     setTimeout(() => setStatus("idle"), 2200)
   }
 

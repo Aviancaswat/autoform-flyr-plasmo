@@ -5,90 +5,135 @@ chrome.action.onClicked.addListener(async (tab) => {
   }
 })
 
-// Listen for messages from the side panel
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("[Background] onMessage listener ejecutado. Request:", request)
-  if (request.action === "changeBackground") {
-    console.log("[Background] Mensaje recibido para cambiar background con color:", request.color)
+  console.log('[Background] onMessage listener ejecutado con request:', request)
+  console.log('[Background] sender:', sender)
+  if (request.action === 'fillForm') {
+    console.log('[Background] Acción detectada: fillForm')
     
-    // Get the active tab
     chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-      console.log("[Background] Pestaña activa encontrada:", tabs[0]?.id, tabs[0]?.url)
+      console.log('[Background] Pestaña activa encontrada:', tabs[0]?.id, tabs[0]?.url)
       if (tabs[0]?.id) {
-        // Try to send message to the content script in the active tab
         chrome.tabs.sendMessage(tabs[0].id, {
-          action: "changeBackground",
-          color: request.color
-        }, { frameId: 0 }).then(() => {
-          console.log("[Background] Mensaje enviado al content script exitosamente")
-          sendResponse({ success: true, method: "contentScript" })
+          action: 'setDefaultFormValues'
+        }, { frameId: 0 }).then((response) => {
+          console.log('[Background] Mensaje enviado al content script exitosamente. Respuesta:', response)
+          sendResponse({ success: true, method: 'contentScript', response })
         }).catch((error) => {
-          console.error("[Background] Error enviando mensaje al content script:", error.message)
-          // If content script isn't injected, inject it now
-          console.log("[Background] Content script no disponible, inyectando script directamente...")
+          console.error('[Background] Error enviando mensaje al content script:', error.message)
+          console.error('[Background] Content script no disponible, inyectando script directamente...')
+          
           chrome.scripting.executeScript({
             target: { tabId: tabs[0].id },
-            func: (color) => {
-              console.log("[Script Inyectado] Función ejecutada, cambiando background a:", color)
-              
-              // Cambiar body
-              document.body.style.backgroundColor = color
-              document.body.style.setProperty('background-color', color, 'important')
-              document.body.style.color = 'white'
-              document.body.style.setProperty('color', 'white', 'important')
-              
-              // Cambiar html
-              document.documentElement.style.backgroundColor = color
-              document.documentElement.style.setProperty('background-color', color, 'important')
-              document.documentElement.style.color = 'white'
-              document.documentElement.style.setProperty('color', 'white', 'important')
-              
-              // Inyectar CSS directo
-              const style = document.createElement('style')
-              style.textContent = `
-                html, body {
-                  background-color: ${color} !important;
-                  background: ${color} !important;
-                  color: white !important;
+            func: () => {
+              const userNamesData = ['monitoreo']
+              const lastNamesData = ['digital']
+              const emailsData = ['monitoreo.digital@avianca.com']
+              const phoneNumbersData = [
+                '123456',
+                '987654',
+                '654321',
+                '321654',
+                '987123',
+                '456789',
+                '102938',
+                '112233',
+                '778899',
+                '334455'
+              ]
+
+              const getDataRandom = (data: string[] = []): string => {
+                const randomIndex = Math.floor(Math.random() * data.length);
+                return data[randomIndex];
+              };
+
+              const getValueElement = (element: HTMLInputElement | HTMLButtonElement): string => {
+                let value = '';
+                if (element.name === 'email' || element.name === 'confirmEmail' || element.id.includes('email') || element.id.includes('confirmEmail')) {
+                  value = getDataRandom(emailsData);
+                } else if (element.name === 'phone_phoneNumberId' || element.id.includes('phone_phoneNumberId')) {
+                  value = getDataRandom(phoneNumbersData);
+                } else if (element.id.includes('IdFirstName')) {
+                  value = getDataRandom(userNamesData);
+                } else {
+                  value = getDataRandom(lastNamesData);
                 }
-                * {
-                  background-color: rgb(0,0,0,0) !important;
-                  color: white !important;
+                return value;
+              };
+
+              const getButtonAndClickItem = (): void => {
+                const listOptions = document.querySelector('.ui-dropdown_list');
+                const buttonElement = listOptions?.querySelector('.ui-dropdown_item>button') as HTMLButtonElement;
+                if (buttonElement) {
+                  buttonElement.click();
                 }
-              `
-              document.head.appendChild(style)
-              
-              const bgColor = window.getComputedStyle(document.body).backgroundColor
-              const textColor = window.getComputedStyle(document.body).color
-              console.log("[Script Inyectado] Background del body después del cambio:", bgColor)
-              console.log("[Script Inyectado] Color del texto después del cambio:", textColor)
-              
-              return { 
-                success: true, 
-                bodyBg: bgColor,
-                bodyColor: textColor,
-                timestamp: new Date().toISOString()
-              }
-            },
-            args: [request.color]
+              };
+
+              const setValuesDefaultAutoForm = (): void => {
+                const elements = document.querySelectorAll('.ui-input');
+                Array.from(elements).forEach((element) => {
+                  if (element.tagName === 'BUTTON') {
+                    if ((element as any).id === 'passengerId') {
+                      (element as HTMLButtonElement).click();
+                      setTimeout(() => {
+                        getButtonAndClickItem();
+                      }, 1000);
+                    } else if ((element as any).id === 'phone_prefixPhoneId') {
+                      setTimeout(() => {
+                        (element as HTMLButtonElement).click();
+                        getButtonAndClickItem();
+                      }, 1000);
+                    } else {
+                      (element as HTMLButtonElement).click();
+                      getButtonAndClickItem();
+                    }
+                  } else if (element.tagName === 'INPUT') {
+                    const containers = document.querySelectorAll('.ui-input-container');
+                    Array.from(containers).forEach((e) => {
+                      e.classList.add('is-focused');
+                    });
+                    const eventBlur = new Event('blur');
+                    const eventFocus = new Event('focus');
+                    (element as HTMLInputElement).value = getValueElement(element as HTMLInputElement);
+                    ['change', 'input'].forEach((event) => {
+                      const handleEvent = new Event(event, { bubbles: true, cancelable: false });
+                      element.dispatchEvent(handleEvent);
+                    });
+                    element.dispatchEvent(eventFocus);
+                    setTimeout(() => {
+                      element.dispatchEvent(eventBlur);
+                      Array.from(containers).forEach((e) => {
+                        e.classList.remove('is-focused');
+                      });
+                    }, 100);
+                  }
+                });
+                const fieldAuthoritation = document.querySelector('#acceptNewCheckbox') as HTMLInputElement;
+                if (fieldAuthoritation) {
+                  fieldAuthoritation.checked = true;
+                }
+              };
+
+              setValuesDefaultAutoForm();
+              return { success: true, message: 'Formulario rellenado' };
+            }
           }).then((results) => {
-            console.log("[Background] Script inyectado exitosamente. Resultados:", results)
-            sendResponse({ success: true, method: "scriptInjection", results })
+            console.log('[Background] Script inyectado exitosamente. Resultados:', results)
+            sendResponse({ success: true, method: 'scriptInjection', results })
           }).catch((err) => {
-            console.error("[Background] Error al inyectar script:", err.message)
-            sendResponse({ success: false, error: err.message, method: "scriptInjection" })
+            console.error('[Background] Error al inyectar script:', err.message)
+            sendResponse({ success: false, error: err.message, method: 'scriptInjection' })
           })
         })
       } else {
-        console.error("[Background] No se encontró pestaña activa")
-        sendResponse({ success: false, error: "No active tab found" })
+        console.error('[Background] No se encontró pestaña activa')
+        sendResponse({ success: false, error: 'No active tab found' })
       }
     }).catch((err) => {
-      console.error("[Background] Error al consultar pestaña activa:", err)
+      console.error('[Background] Error al consultar pestaña activa:', err)
       sendResponse({ success: false, error: err.message })
     })
     
-    // Indicar que vamos a responder de forma asincrónica
     return true
   }
 })
