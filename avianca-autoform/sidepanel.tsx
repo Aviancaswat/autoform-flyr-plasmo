@@ -7,54 +7,13 @@ function IndexSidepanel() {
 
   const handleClick = async () => {
     if (status === "loading") return
-
-    console.log('sidepanel: button clicked, current status', status)
-    // Request background/service-worker to start the fill process
-    try {
-      setStatus("loading")
-      console.log('sidepanel: sending startFill to runtime')
-      chrome.runtime.sendMessage({ type: "startFill" }, (resp) => {
-        if (chrome.runtime.lastError) {
-          console.error('sidepanel: sendMessage lastError', chrome.runtime.lastError.message)
-        } else {
-          console.log('sidepanel: sendMessage response', resp)
-        }
-      })
-    } catch (e) {
-      console.error('sidepanel: error sending startFill', e)
-      // fallback: simulate if messaging not available
-      setStatus("loading")
-      await new Promise((r) => setTimeout(r, 1400))
-      setStatus("done")
-      setTimeout(() => setStatus("idle"), 2200)
-    }
+    setStatus("loading")
+    // Simula el llenado de campos (reemplazar por la lógica real)
+    await new Promise((r) => setTimeout(r, 1400))
+    setStatus("done")
+    // Después de unos segundos vuelve a idle para permitir nueva interacción
+    setTimeout(() => setStatus("idle"), 2200)
   }
-
-  React.useEffect(() => {
-    const listener = (message: any) => {
-      console.log('sidepanel: runtime.onMessage received', message)
-      if (!message || message.type !== "status") return
-      const s = message.status
-      console.log('sidepanel: status update', s)
-      if (s === "loading" || s === "done" || s === "idle") {
-        setStatus(s)
-        // If done, reset to idle after a small delay so UI returns to initial state
-        if (s === "done") setTimeout(() => setStatus("idle"), 2200)
-      }
-    }
-
-    try {
-      chrome.runtime.onMessage.addListener(listener)
-    } catch (e) {
-      // ignore if chrome API not available in this environment
-    }
-
-    return () => {
-      try {
-        chrome.runtime.onMessage.removeListener(listener)
-      } catch (e) {}
-    }
-  }, [])
 
   return (
     <div className="w-full flex items-center justify-center p-6" style={{ background: 'linear-gradient(180deg,#031618 0%, #041d20 100%)' }}>
