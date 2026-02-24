@@ -1,7 +1,7 @@
 {
   "name": "avianca-autoform",
-  "displayName": "Avianca autoform",
-  "version": "0.0.1",
+  "displayName": "Avianca autoform v2.0",
+  "version": "2.0.0",
   "description": "llenado de campos de formulario de pasajeros con valores por defecto",
   "author": "fainnerramirez@gmail.com",
   "scripts": {
